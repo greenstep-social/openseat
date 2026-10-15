@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSeat — Твоё место. Твой ритм.</title>
+  <meta name="description" content="Найди своё пространство для учёбы: уровень шума, свободные места и любимые локации в одном месте.">
+  <meta name="theme-color" content="#11151e">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/manrope-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css?v=letovo-map-5">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('openseat.navy.theme')||'dark'}catch{}</script>
+</head>
+<body>
+  <a class="skip-link" href="#app">Перейти к содержимому</a>
+  <header class="header">
+    <a class="brand" href="#catalog" aria-label="OpenSeat — каталог"><img src="assets/logo-white.svg" alt=""><span>openseat<span class="brand-dot">.</span></span></a>
+    <nav class="nav" aria-label="Основная навигация">
+      <a href="#catalog" data-icon="grid">Пространства</a>
+      <a href="#map" data-icon="map">Карта</a>
+      <a href="#favorites" data-icon="heart">Избранное <span id="fav-count"></span></a>
+    </nav>
+    <div class="header-actions"><button class="icon-button" id="theme-toggle" aria-label="Сменить тему" title="Сменить тему"></button><button class="focus-button" id="focus-open"><span class="focus-orbit"></span><span id="focus-label">Режим фокуса</span></button></div>
+  </header>
+  <main id="app" tabindex="-1"></main>
+  <footer class="footer"><a class="brand" href="#catalog">openseat<span class="brand-dot">.</span></a><span>Меньше поисков. Больше времени на своё.</span><button class="text-button" data-action="about">О проекте <span aria-hidden="true">↗</span></button></footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="modal" aria-labelledby="modal-title"><button class="icon-button modal-close" aria-label="Закрыть окно" data-action="close-modal">×</button><div id="modal-body"></div></dialog>
+  <script src="assets/letovo/data.js?v=5"></script>
+  <script src="assets/letovo/map.js?v=5"></script>
+  <script src="app.js?v=letovo-map-5"></script>
+</body>
+</html>

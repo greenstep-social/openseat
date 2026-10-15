@@ -1,0 +1,13 @@
+[
+  {
+    "id": "library",
+    "name": "Библиотека",
+    "sensor_location": "test_room",
+    "description": "Место, чтобы сосредоточиться на главном: подготовиться к занятиям, почитать или поработать над своим проектом.",
+    "photo": "assets/space-0.jpg",
+    "building": "",
+    "floor": null,
+    "capacity": null,
+    "occupancy_enabled": false
+  }
+]

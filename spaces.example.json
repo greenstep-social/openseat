@@ -1,0 +1,24 @@
+[
+  {
+    "id": "library",
+    "name": "Библиотека",
+    "sensor_location": "test_room",
+    "description": "Место, чтобы сосредоточиться на главном: подготовиться к занятиям, почитать или поработать над своим проектом.",
+    "photo": "assets/space-0.jpg",
+    "building": "",
+    "floor": null,
+    "capacity": null,
+    "occupancy_enabled": false
+  },
+  {
+    "id": "quiet-hall",
+    "name": "Тихий зал",
+    "sensor_location": "quiet_hall",
+    "description": "Место для самостоятельной работы.",
+    "photo": "",
+    "building": "Учебный корпус",
+    "floor": 2,
+    "capacity": 20,
+    "occupancy_enabled": false
+  }
+]
