@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Загруженность комнат — демо</title>
+<style>
+  :root {
+    --bg: #eef1f6;
+    --card-bg: #ffffff;
+    --text: #14213d;
+    --muted: #6b7280;
+    --border: #e7e9ee;
+    --accent: #f5943c;
+    --quiet: #22c55e;
+    --medium: #f59e0b;
+    --loud: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 2rem;
+  }
+  h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 0.3rem; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin: 0 0 1.25rem; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(20, 33, 61, 0.08);
+    cursor: pointer;
+    outline: 2px solid transparent;
+    transition: outline-color 0.15s;
+  }
+  .card.selected { outline-color: var(--accent); }
+
+  .photo-wrap {
+    position: relative;
+    height: 150px;
+    background: #dde3ec;
+    overflow: hidden;
+  }
+  .photo-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .no-photo-placeholder {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.4rem; color: #94a3b8; font-size: 0.85rem;
+  }
+  .location-badge {
+    position: absolute; left: 0.7rem; bottom: 0.7rem;
+    background: rgba(20, 33, 61, 0.55);
+    color: #fff; font-size: 0.75rem;
+    padding: 0.3rem 0.6rem; border-radius: 999px;
+    display: flex; align-items: center; gap: 0.3rem;
+    backdrop-filter: blur(2px);
+  }
+
+  .card-body { padding: 1rem 1.1rem 1.1rem; }
+  .title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.7rem; }
+
+  .metric-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.45rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .metric-row:first-of-type { border-top: none; }
+  .metric-label { font-size: 0.85rem; color: var(--muted); }
+
+  .noise-badge {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-size: 0.8rem; font-weight: 600;
+    padding: 0.25rem 0.65rem; border-radius: 999px;
+  }
+  .noise-quiet  { background: rgba(34, 197, 94, 0.12);  color: #16803c; }
+  .noise-medium { background: rgba(245, 158, 11, 0.14); color: #a05a04; }
+  .noise-loud   { background: rgba(239, 68, 68, 0.12);  color: #b91c1c; }
+  .noise-nodata { background: #eceef2; color: #6b7280; }
+  .noise-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  .occupancy-value { display: flex; align-items: center; gap: 0.6rem; }
+  .bar-track {
+    width: 110px; height: 8px; border-radius: 999px;
+    background: #eceef2; overflow: hidden;
+  }
+  .bar-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+  .percent-text { font-size: 0.85rem; font-weight: 700; min-width: 2.4em; text-align: right; }
+
+  .free-spots {
+    margin-top: 0.5rem; font-size: 0.85rem; color: var(--muted);
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .status-line { margin-top: 0.5rem; font-size: 0.72rem; }
+  .status-ok { color: #16803c; }
+  .status-error { color: #b91c1c; }
+  .status-nodata { color: var(--muted); }
+  .no-data { color: var(--muted); font-style: italic; }
+
+  .chart-section {
+    margin-top: 1.75rem; background: var(--card-bg);
+    border-radius: 18px; padding: 1.2rem 1.3rem;
+    box-shadow: 0 1px 3px rgba(20, 33, 61, 0.08);
+  }
+  .chart-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1rem; font-size: 0.9rem;
+  }
+  select {
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.35rem 0.6rem; font-size: 0.85rem;
+  }
+  .demo-banner {
+    background: #fef3e2; border: 1px solid #fcd9a8; color: #92450c;
+    border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.82rem;
+    margin-bottom: 1.25rem;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+  <h1>Загруженность комнат</h1>
+  <p class="subtitle">Демо на смоделированных данных — реальный сервер не подключён</p>
+  <div class="demo-banner">⚠️ Это демонстрация с придуманными данными — фото взяты как случайные заглушки (picsum.photos), а не с реальных камер.</div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="chart-section">
+    <div class="chart-header">
+      <span>История: <b id="chartRoomLabel">—</b></span>
+      <select id="hoursSelect">
+        <option value="1">1 час</option>
+        <option value="6">6 часов</option>
+        <option value="24" selected>24 часа</option>
+        <option value="168">7 дней</option>
+      </select>
+    </div>
+    <canvas id="historyChart" height="90"></canvas>
+    <div id="chartNoData" class="no-data" style="display:none; padding: 2rem 0; text-align: center;">
+      Нет данных за выбранный период — камера/сенсор этой комнаты не отвечают
+    </div>
+  </div>
+
+<script>
+const NOISE_LABELS = { quiet: "Тихо", medium: "Средне", loud: "Громко" };
+
+// ---- Смоделированные данные ----
+const MOCK_ROOMS = {
+  room_1: {
+    title: "Зона у панорамных окон",
+    photo: "https://picsum.photos/seed/room1/600/400",
+    count: 5, capacity: 8, noise_category: "medium", status: "ok",
+  },
+  room_2: {
+    title: "Переговорная «Байкал»",
+    photo: "https://picsum.photos/seed/room2/600/400",
+    count: 2, capacity: 6, noise_category: "quiet", status: "ok",
+  },
+  room_3: {
+    title: "Опенспейс, 2 этаж",
+    photo: "https://picsum.photos/seed/room3/600/400",
+    count: 11, capacity: 12, noise_category: "loud", status: "ok",
+  },
+  room_4: {
+    title: "Тихая зона для звонков",
+    photo: "https://picsum.photos/seed/room4/600/400",
+    count: 0, capacity: 4, noise_category: "quiet", status: "ok",
+  },
+  room_5: {
+    title: "Комната отдыха",
+    photo: null,
+    count: null, capacity: 10, noise_category: null, status: "no_data",
+  },
+};
+
+// Смоделированная история occupancy на 24 часа (почасовые точки)
+function mockHistory(peak, noiseLevel) {
+  const points = [];
+  const now = new Date();
+  for (let h = 23; h >= 0; h--) {
+    const t = new Date(now.getTime() - h * 3600 * 1000);
+    const hour = t.getHours();
+    // рабочий день даёт больше людей, ночь — меньше
+    const workHours = hour >= 9 && hour <= 18;
+    const base = workHours ? peak * (0.5 + 0.5 * Math.sin((hour - 9) / 9 * Math.PI)) : Math.random() * 1;
+    const value = Math.max(0, Math.round(base + (Math.random() - 0.5) * 2));
+    points.push({ timestamp: t.toISOString(), count: value });
+  }
+  return points;
+}
+
+let selectedRoom = "room_1";
+let chart = null;
+
+function noiseBadgeHtml(category) {
+  if (!category) {
+    return `<span class="noise-badge noise-nodata"><span class="noise-dot"></span>Нет данных</span>`;
+  }
+  return `<span class="noise-badge noise-${category}">
+            <span class="noise-dot"></span>${NOISE_LABELS[category] ?? category}
+          </span>`;
+}
+
+function occupancyHtml(count, capacity) {
+  if (count === null || count === undefined || !capacity) {
+    return `<span class="no-data">Нет данных</span>`;
+  }
+  const percent = Math.round(Math.min(count, capacity) / capacity * 100);
+  return `
+    <div class="occupancy-value">
+      <div class="bar-track"><div class="bar-fill" style="width: ${percent}%"></div></div>
+      <span class="percent-text">${percent}%</span>
+    </div>`;
+}
+
+function statusLineHtml(status) {
+  if (status === "ok") return { cls: "status-ok", text: "онлайн" };
+  if (status === "no_data") return { cls: "status-nodata", text: "Нет данных — камера/сенсор не отвечают" };
+  return { cls: "status-error", text: status };
+}
+
+function render() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  for (const [roomId, info] of Object.entries(MOCK_ROOMS)) {
+    const isSelected = roomId === selectedRoom;
+    const hasCount = info.count !== null && info.count !== undefined;
+    const freeSpots = hasCount ? Math.max(info.capacity - info.count, 0) : null;
+    const status = statusLineHtml(info.status);
+
+    grid.innerHTML += `
+      <div class="card ${isSelected ? 'selected' : ''}" onclick="selectRoom('${roomId}')">
+        <div class="photo-wrap">
+          <div class="no-photo-placeholder">📷 Нет данных</div>
+          ${info.photo ? `<img class="photo-img" src="${info.photo}" alt="${roomId}" onerror="this.style.display='none'">` : ""}
+          <div class="location-badge">📍 ${roomId}</div>
+        </div>
+        <div class="card-body">
+          <div class="title">${info.title}</div>
+
+          <div class="metric-row">
+            <span class="metric-label">Уровень громкости</span>
+            ${noiseBadgeHtml(info.noise_category)}
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-label">Загруженность</span>
+            ${occupancyHtml(info.count, info.capacity)}
+          </div>
+
+          <div class="free-spots">
+            ${hasCount ? `👥 Свободно ${freeSpots} мест` : `<span class="no-data">Нет данных о свободных местах</span>`}
+          </div>
+
+          <div class="status-line ${status.cls}">${status.text}</div>
+        </div>
+      </div>`;
+  }
+}
+
+function selectRoom(roomId) {
+  selectedRoom = roomId;
+  render();
+  renderChart();
+}
+
+function renderChart() {
+  const info = MOCK_ROOMS[selectedRoom];
+  document.getElementById("chartRoomLabel").textContent = info.title;
+
+  const canvas = document.getElementById("historyChart");
+  const noDataMsg = document.getElementById("chartNoData");
+
+  if (info.count === null || info.count === undefined) {
+    canvas.style.display = "none";
+    noDataMsg.style.display = "block";
+    if (chart) { chart.destroy(); chart = null; }
+    return;
+  }
+  canvas.style.display = "block";
+  noDataMsg.style.display = "none";
+
+  const readings = mockHistory(info.capacity, info.noise_category);
+  const labels = readings.map(r => new Date(r.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}));
+  const values = readings.map(r => r.count);
+
+  if (chart) chart.destroy();
+  const ctx = canvas.getContext("2d");
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Людей в комнате",
+        data: values,
+        borderColor: "#f5943c",
+        backgroundColor: "rgba(245, 148, 60, 0.12)",
+        fill: true,
+        tension: 0.2,
+        stepped: true,
+      }],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { ticks: { color: "#6b7280", maxTicksLimit: 8 }, grid: { color: "#eceef2" } },
+        y: { ticks: { color: "#6b7280", stepSize: 1 }, beginAtZero: true, grid: { color: "#eceef2" } },
+      },
+      plugins: { legend: { labels: { color: "#14213d" } } },
+    },
+  });
+}
+
+document.getElementById("hoursSelect").addEventListener("change", renderChart);
+
+render();
+renderChart();
+</script>
+</body>
+</html>
