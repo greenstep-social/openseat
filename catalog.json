@@ -8,6 +8,6 @@
     "building": "",
     "floor": null,
     "capacity": null,
-    "occupancy_enabled": false
+    "occupancy_enabled": true
   }
 ]
