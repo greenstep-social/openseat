@@ -7,7 +7,7 @@
     "photo": "assets/space-0.jpg",
     "building": "",
     "floor": null,
-    "capacity": null,
+    "capacity": 16,
     "occupancy_enabled": true
   }
 ]
